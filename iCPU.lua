@@ -23,26 +23,24 @@ LibStub("iLib"):Register(AddonName, nil, iCPU);
 -- Variables, functions and colors
 -----------------------------------------
 
-local UpdateTimer; -- timer when the roster is fetched again
+local hugeAddonMemory = 61440; -- 60 MB = red colors, everything lower colors it green
+local hugeFramerate = 48; -- at 24fps, the fps becomes yellow, higher values color it green, lower values red
+local hugeLatency = 200; -- at 100ms, the latency becomes yellow, lower than 100ms colors it green, higher values red
+
+local UpdateTimer;
 local Mods = {};
-M = Mods;
 
 local iFramerate = 0;
 local iLatencyHome = 0;
 local iLatencyWorld = 0;
 local iUpload = 0;
 local iDownload = 0;
-
 local TotalCPU = 0;
 local TotalCPUDiff = 0;
 local TotalMemory = 0;
 local TotalMemoryDiff = 0;
 
 local isProfiling;
-
-local hugeAddonMemory = 61440; -- 60 MB
-local hugeFramerate = 48;
-local hugeLatency = 200;
 
 local COLOR_GOLD = "|cfffed100%s|r";
 
@@ -54,9 +52,9 @@ local function format_memory(value, state, space)
 	local v2 = value;
 	
 	if( value > 1024 ) then
-		value = ("%.2f"..(space and "" or " ").."|cffff8100%s|r"):format((value / 1024), "mb");
+		value = ("%."..iCPU.db.DecimalDigits.."f"..(space and "" or " ").."|cffff8100%s|r"):format((value / 1024), L["mb"]);
 	else
-		value = ("%.2f"..(space and "" or " ")..COLOR_GOLD):format(value, "kb");
+		value = ("%."..iCPU.db.DecimalDigits.."f"..(space and "" or " ")..COLOR_GOLD):format(value, L["kb"]);
 	end
 	
 	if( state == true ) then
@@ -73,15 +71,15 @@ local function format_memory(value, state, space)
 end
 
 local function format_kbs(value)
-	return ("%.2f "..COLOR_GOLD):format(value, "kb/s");
+	return ("%."..iCPU.db.DecimalDigits.."f "..COLOR_GOLD):format(value, L["kb/s"]);
 end
 
 local function format_latency(value, space)
-	return ("|cff%s%d|r"..(space and "" or " ")..COLOR_GOLD):format(LibCrayon:GetThresholdHexColor(hugeLatency - value, hugeLatency), value, "ms");
+	return ("|cff%s%d|r"..(space and "" or " ")..COLOR_GOLD):format(LibCrayon:GetThresholdHexColor(hugeLatency - value, hugeLatency), value, L["ms"]);
 end
 
 local function format_fps(value, space)
-	return ("|cff%s%.2f|r"..(space and "" or " ")..COLOR_GOLD):format(LibCrayon:GetThresholdHexColor(value, hugeFramerate), value, "fps");
+	return ("|cff%s%."..iCPU.db.DecimalDigits.."f|r"..(space and "" or " ")..COLOR_GOLD):format(LibCrayon:GetThresholdHexColor(value, hugeFramerate), value, L["fps"]);
 end
 
 -----------------------------
@@ -97,6 +95,11 @@ iCPU.ldb.OnClick = function(_, button)
 	if( button == "LeftButton" ) then
 		if( not _G.IsModifierKeyDown() ) then
 			collectgarbage();
+		else
+			if( _G.IsControlKeyDown() ) then
+				_G.SetCVar("scriptProfile", tostring( 1 - tonumber(_G.GetCVar("scriptProfile")) ));
+				_G.ReloadUI();
+			end
 		end
 	elseif( button == "RightButton" ) then
 		if( not _G.IsModifierKeyDown() ) then
@@ -135,6 +138,7 @@ do
 			elseif( k == "memd"   ) then return t[7]
 			elseif( k == "cpus"   ) then return t[5] == 0 and 0 or (t[5] > 0 and true or false)
 			elseif( k == "mems"   ) then return t[7] == 0 and 0 or (t[7] > 0 and true or false)
+			elseif( k == "grdn"   ) then return t[8]
 			end
 		end,
 		__newindex = function(t, k, v)
@@ -144,6 +148,7 @@ do
 			elseif( k == "cpud" ) then slot = 5
 			elseif( k == "mem"  ) then slot = 6
 			elseif( k == "memd" ) then slot = 7
+			elseif( k == "grdn" ) then slot = 8
 			end
 			
 			if( slot ) then
@@ -171,6 +176,7 @@ do
 					[5] = 0, -- CPU diff
 					[6] = 0, -- Mem usage
 					[7] = 0, -- Mem diff
+					[8] = (_G.GetAddOnMetadata(name, "Author") == "grdn")
 				};
 				setmetatable(Mods[Iter], mt);
 				
@@ -182,7 +188,7 @@ do
 		isProfiling = _G.GetCVar("scriptProfile") == "1";
 		
 		-- Initialize the timer
-		self:RefreshTimer(1.5);
+		self:RefreshTimer();
 		
 		self:UnregisterEvent("PLAYER_ENTERING_WORLD");
 	end
@@ -200,7 +206,7 @@ function iCPU:RefreshTimer(timeToPass)
 	end
 	
 	if( not timeToPass ) then
-		timeToPass = self.db.UpdateTimer;
+		timeToPass = self.db.UpdateInterval;
 	end
 	
 	UpdateTimer = self:ScheduleRepeatingTimer("UpdateData", timeToPass);
@@ -212,7 +218,17 @@ end
 ----------------------
 
 function iCPU:UpdateBroker()
-	self.ldb.text = format_memory(TotalMemory, nil, true).." "..format_fps(iFramerate, true).." "..format_latency(iLatencyWorld, true);
+	if( not self.db.PluginShowMemory and not self.db.PluginShowFramerate and not self.db.PluginShowLatency
+			and not (isProfiling and not self.db.PluginShowCPU)) then
+		self.ldb.text = "|cffffff00"..AddonName.."|r";
+	else		
+		self.ldb.text =
+			(isProfiling and self.db.PluginShowCPU and "0ms".." " or "")..
+			(self.db.PluginShowMemory and format_memory(TotalMemory, nil, true).." " or "")..
+			(self.db.PluginShowFramerate and format_fps(iFramerate, true).." " or "")..
+			(self.db.PluginShowLatency and format_latency(iLatencyWorld, true).." " or "")
+		;
+	end
 end
 
 ------------------
@@ -301,24 +317,24 @@ function iCPU:UpdateTooltip(tip)
 		tip:AddLine(" ");
 		
 		line = tip:AddLine(" ");
-		tip:SetCell(line, 1, (COLOR_GOLD):format("Total"), nil, "LEFT", 2);
+		tip:SetCell(line, 1, (COLOR_GOLD):format(_G.TOTAL), nil, "LEFT", 2);
 		
 		line = tip:AddLine(" ");
-		tip:SetCell(line, 1, (COLOR_GOLD):format("Total & Blizzard"), nil, "LEFT", -2);
+		tip:SetCell(line, 1, (COLOR_GOLD):format(L["Blizz UI"]), nil, "LEFT", -2);
 		
 		tip:AddLine(" ");
 		
 		line = tip:AddLine(" ");
-		tip:SetCell(line, 1, (COLOR_GOLD):format("Framerate"), nil, "LEFT", -2);
+		tip:SetCell(line, 1, (COLOR_GOLD):format(L["Framerate"]), nil, "LEFT", -2);
 		
 		line = tip:AddLine(" ");
-		tip:SetCell(line, 1, (COLOR_GOLD):format("Latency"), nil, "LEFT", -2);
+		tip:SetCell(line, 1, (COLOR_GOLD):format(L["Latency"]), nil, "LEFT", -2);
 		
 		line = tip:AddLine(" ");
-		tip:SetCell(line, 1, (COLOR_GOLD):format("Download"), nil, "LEFT", -2);
+		tip:SetCell(line, 1, (COLOR_GOLD):format(L["Download"]), nil, "LEFT", -2);
 		
 		line = tip:AddLine(" ");
-		tip:SetCell(line, 1, (COLOR_GOLD):format("Upload"), nil, "LEFT", -2);
+		tip:SetCell(line, 1, (COLOR_GOLD):format(L["Upload"]), nil, "LEFT", -2);
 		
 		if( LibStub("iLib"):IsUpdate(AddonName) ) then
 			tip:AddSeparator();
@@ -328,7 +344,15 @@ function iCPU:UpdateTooltip(tip)
 	end
 	
 	for i = 1, self.db.DisplayNumAddons do
-		tip:SetCell(i, 2, Mods[i].name);
+		if( Mods[i].name == AddonName ) then
+			tip:SetCell(i, 2, "|cff11bbbb"..Mods[i].name.."|r");
+		else
+			if( Mods[i].grdn ) then
+				tip:SetCell(i, 2, "|cffffff66"..Mods[i].name.."|r");
+			else
+				tip:SetCell(i, 2, Mods[i].name);
+			end
+		end
 		
 		if( isProfiling ) then
 			tip:SetCell(i, 3, Mods[i].cpu);
@@ -347,7 +371,7 @@ function iCPU:UpdateTooltip(tip)
 	tip:SetCell(self.db.DisplayNumAddons + 2, isProfiling and 5 or 3, format_memory(TotalMemory));
 	tip:SetCell(self.db.DisplayNumAddons + 2, isProfiling and 6 or 4, format_memory(TotalMemoryDiff));
 	
-	tip:SetCell(self.db.DisplayNumAddons + 3, isProfiling and 5 or 3, format_memory(collectgarbage("count")));
+	tip:SetCell(self.db.DisplayNumAddons + 3, isProfiling and 5 or 3, format_memory(collectgarbage("count") - TotalMemory));
 	
 	tip:SetCell(self.db.DisplayNumAddons + 5, isProfiling and 5 or 3, format_fps(iFramerate), nil, "RIGHT", 2);
 	tip:SetCell(self.db.DisplayNumAddons + 6, isProfiling and 5 or 3, format_latency(iLatencyWorld), nil, "RIGHT", 2);
