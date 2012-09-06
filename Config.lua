@@ -116,7 +116,15 @@ local function CreateConfig()
 				order = 30,
 				inline = true,
 				args = {
-				
+					DisplayNumAddons = {
+						type = "range",
+						name = L["Number of Addons"],
+						desc = L["Setting this to 0 will disable listing addons."],
+						order = 1,
+						min = 0,
+						max = 50,
+						step = 1,
+					},
 				},
 			},
 			

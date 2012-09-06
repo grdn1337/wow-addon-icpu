@@ -17,7 +17,8 @@ L["Display Latency"] = true
 L["Display CPU"] = true
 L["Displays the CPU time on the plugin when CPU profiling is enabled (Ctrl+Click)."] = true
 L["Tooltip Options"] = true
-
+L["Number of Addons"] = true
+L["Setting this to 0 will disable listing addons."] = true
 
 L["mb"] = true
 L["kb"] = true
