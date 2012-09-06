@@ -70,6 +70,16 @@ local function format_memory(value, state, space)
 	return value;
 end
 
+local function format_cpu(value, state, space)	
+	if( state ) then
+		value = ("|cff00ffff%."..iCPU.db.DecimalDigits.."f|r"..(space and "" or " ")..COLOR_GOLD):format(value, L["ms"]);
+	else
+		value = ("|cffee33ff%."..iCPU.db.DecimalDigits.."f|r"..(space and "" or " ")..COLOR_GOLD):format(value, L["ms"]);
+	end
+		
+	return value;
+end
+
 local function format_kbs(value)
 	return ("%."..iCPU.db.DecimalDigits.."f "..COLOR_GOLD):format(value, L["kb/s"]);
 end
@@ -136,7 +146,7 @@ do
 			elseif( k == "cpud"   ) then return t[5]
 			elseif( k == "mem"    ) then return t[6]
 			elseif( k == "memd"   ) then return t[7]
-			elseif( k == "cpus"   ) then return t[5] == 0 and 0 or (t[5] > 0 and true or false)
+			elseif( k == "cpus"   ) then return not(t[5] == 0)
 			elseif( k == "mems"   ) then return t[7] == 0 and 0 or (t[7] > 0 and true or false)
 			elseif( k == "grdn"   ) then return t[8]
 			end
@@ -223,7 +233,7 @@ function iCPU:UpdateBroker()
 		self.ldb.text = "|cffffff00"..AddonName.."|r";
 	else		
 		self.ldb.text =
-			(isProfiling and self.db.PluginShowCPU and "0ms".." " or "")..
+			(isProfiling and self.db.PluginShowCPU and format_cpu(TotalCPU, true, true).." " or "")..
 			(self.db.PluginShowMemory and format_memory(TotalMemory, nil, true).." " or "")..
 			(self.db.PluginShowFramerate and format_fps(iFramerate, true).." " or "")..
 			(self.db.PluginShowLatency and format_latency(iLatencyWorld, true).." " or "")
@@ -301,6 +311,7 @@ end
 -- UpdateTooltip
 -----------------------
 
+local pos;
 function iCPU:UpdateTooltip(tip)
 	local firstDisplay = tip:GetLineCount() == 0;
 	if( firstDisplay ) then
@@ -325,19 +336,24 @@ function iCPU:UpdateTooltip(tip)
 		line = tip:AddLine(" ");
 		tip:SetCell(line, 1, (COLOR_GOLD):format(L["Blizz UI"]), nil, "LEFT", -2);
 		
-		tip:AddLine(" ");
-		
-		line = tip:AddLine(" ");
-		tip:SetCell(line, 1, (COLOR_GOLD):format(L["Framerate"]), nil, "LEFT", -2);
-		
-		line = tip:AddLine(" ");
-		tip:SetCell(line, 1, (COLOR_GOLD):format(L["Latency"]), nil, "LEFT", -2);
-		
-		line = tip:AddLine(" ");
-		tip:SetCell(line, 1, (COLOR_GOLD):format(L["Download"]), nil, "LEFT", -2);
-		
-		line = tip:AddLine(" ");
-		tip:SetCell(line, 1, (COLOR_GOLD):format(L["Upload"]), nil, "LEFT", -2);
+		if( self.db.TooltipShowFramerate or self.db.TooltipShowLatency or self.db.TooltipShowStreaming ) then
+			tip:AddLine(" ");
+			
+			if( self.db.TooltipShowFramerate ) then
+				line = tip:AddLine(" ");
+				tip:SetCell(line, 1, (COLOR_GOLD):format(L["Framerate"]), nil, "LEFT", -2);
+			end
+			
+			if( self.db.TooltipShowLatency ) then
+				line = tip:AddLine(" ");
+				tip:SetCell(line, 1, (COLOR_GOLD):format(L["Latency"]), nil, "LEFT", -2);
+			end
+			
+			if( self.db.TooltipShowStreaming ) then
+				line = tip:AddLine(" ");
+				tip:SetCell(line, 1, (COLOR_GOLD):format(L["Stream (U/D)"]), nil, "LEFT", -2);
+			end
+		end
 		
 		if( LibStub("iLib"):IsUpdate(AddonName) ) then
 			tip:AddSeparator();
@@ -359,8 +375,8 @@ function iCPU:UpdateTooltip(tip)
 			end
 			
 			if( isProfiling ) then
-				tip:SetCell(i, 3, Mods[i].cpu);
-				tip:SetCell(i, 4, Mods[i].cpud);
+				tip:SetCell(i, 3, format_cpu(Mods[i].cpu, Mods[i].cpus));
+				tip:SetCell(i, 4, Mods[i].cpud == 0 and "" or format_cpu(Mods[i].cpud, Mods[i].cpus));
 			end
 			
 			tip:SetCell(i, isProfiling and 5 or 3, format_memory(Mods[i].mem, Mods[i].mems));
@@ -371,8 +387,8 @@ function iCPU:UpdateTooltip(tip)
 	end
 	
 	if( isProfiling ) then
-		tip:SetCell(numAddons + 2, 3, TotalCPU);
-		tip:SetCell(numAddons + 2, 4, TotalCPUDiff);
+		tip:SetCell(numAddons + 2, 3, format_cpu(TotalCPU, true));
+		tip:SetCell(numAddons + 2, 4, format_cpu(TotalCPUDiff, true));
 	end
 	
 	tip:SetCell(numAddons + 2, isProfiling and 5 or 3, format_memory(TotalMemory));
@@ -380,8 +396,19 @@ function iCPU:UpdateTooltip(tip)
 	
 	tip:SetCell(numAddons + 3, isProfiling and 5 or 3, format_memory(collectgarbage("count") - TotalMemory));
 	
-	tip:SetCell(numAddons + 5, isProfiling and 5 or 3, format_fps(iFramerate), nil, "RIGHT", 2);
-	tip:SetCell(numAddons + 6, isProfiling and 5 or 3, format_latency(iLatencyWorld), nil, "RIGHT", 2);
-	tip:SetCell(numAddons + 7, isProfiling and 5 or 3, format_kbs(iDownload), nil, "RIGHT", 2);
-	tip:SetCell(numAddons + 8, isProfiling and 5 or 3, format_kbs(iUpload), nil, "RIGHT", 2);
+	pos = 5;
+	if( self.db.TooltipShowFramerate ) then
+		tip:SetCell(numAddons + pos, isProfiling and 5 or 3, format_fps(iFramerate), nil, "RIGHT", 2);
+		pos = pos + 1;
+	end
+	
+	if( self.db.TooltipShowLatency ) then
+		tip:SetCell(numAddons + pos, isProfiling and 5 or 3, format_latency(iLatencyWorld), nil, "RIGHT", 2);
+		pos = pos + 1;
+	end
+	
+	if( self.db.TooltipShowStreaming ) then
+		tip:SetCell(numAddons + pos, isProfiling and 5 or 3, format_kbs(iUpload).." / "..format_kbs(iDownload), nil, "RIGHT", 2);
+		--pos = pos + 1; <- haha, I don't think we need this here. Lets save 0,000001 ns CPU using :D
+	end
 end
