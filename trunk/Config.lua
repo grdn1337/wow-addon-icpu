@@ -31,6 +31,9 @@ function iCPU:CreateDB()
 		PluginShowFramerate = true,
 		PluginShowLatency = true,
 		PluginShowCPU = true,
+		TooltipShowFramerate = true,
+		TooltipShowLatency = true,
+		TooltipShowStreaming = true,
 	}};
 end
 
@@ -124,6 +127,22 @@ local function CreateConfig()
 						min = 0,
 						max = 50,
 						step = 1,
+						width = "full",
+					},
+					TooltipShowFramerate = {
+						type = "toggle",
+						name = L["Display FPS"],
+						order = 5,
+					},
+					TooltipShowLatency = {
+						type = "toggle",
+						name = L["Display Latency"],
+						order = 10,
+					},
+					TooltipShowStreaming = {
+						type = "toggle",
+						name = L["Display Streaming"],
+						order = 15,
 					},
 				},
 			},

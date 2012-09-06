@@ -15,6 +15,7 @@ L["Display Memory"] = true
 L["Display FPS"] = true
 L["Display Latency"] = true
 L["Display CPU"] = true
+L["Display Streaming"] = true
 L["Displays the CPU time on the plugin when CPU profiling is enabled (Ctrl+Click)."] = true
 L["Tooltip Options"] = true
 L["Number of Addons"] = true
@@ -28,7 +29,6 @@ L["fps"] = true
 L["Blizz UI"] = true
 L["Framerate"] = true
 L["Latency"] = true
-L["Download"] = true
-L["Upload"] = true
+L["Stream (U/D)"] = true
 
 --@end-do-not-package@
