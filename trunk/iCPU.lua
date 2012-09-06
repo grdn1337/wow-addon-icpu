@@ -304,17 +304,20 @@ end
 function iCPU:UpdateTooltip(tip)
 	local firstDisplay = tip:GetLineCount() == 0;
 	if( firstDisplay ) then
-		tip:SetColumnLayout(isProfiling and 6 or 4, "RIGHT", "LEFT", "RIGHT", "RIGHT", "RIGHT", "RIGHT");
+		tip:SetColumnLayout(isProfiling and 6 or 4, "LEFT", "LEFT", "RIGHT", "RIGHT", "RIGHT", "RIGHT");
 	end
 	
 	local line;
+	local numAddons = self.db.DisplayNumAddons > _G.GetNumAddOns() and _G.GetNumAddOns() or self.db.DisplayNumAddons;
 	
 	if( firstDisplay ) then
-		for i = 1, self.db.DisplayNumAddons do
-			tip:AddLine((COLOR_GOLD):format(i));
+		if( self.db.DisplayNumAddons > 0 ) then
+			for i = 1, numAddons do
+				tip:AddLine((COLOR_GOLD):format(i));
+			end
+			
+			tip:AddLine(" ");
 		end
-		
-		tip:AddLine(" ");
 		
 		line = tip:AddLine(" ");
 		tip:SetCell(line, 1, (COLOR_GOLD):format(_G.TOTAL), nil, "LEFT", 2);
@@ -343,38 +346,42 @@ function iCPU:UpdateTooltip(tip)
 		end
 	end
 	
-	for i = 1, self.db.DisplayNumAddons do
-		if( Mods[i].name == AddonName ) then
-			tip:SetCell(i, 2, "|cff11bbbb"..Mods[i].name.."|r");
-		else
-			if( Mods[i].grdn ) then
-				tip:SetCell(i, 2, "|cffffff66"..Mods[i].name.."|r");
+	if( self.db.DisplayNumAddons > 0 ) then
+		for i = 1, numAddons do
+			if( Mods[i].name == AddonName ) then
+				tip:SetCell(i, 2, "|cff11bbbb"..Mods[i].name.."|r");
 			else
-				tip:SetCell(i, 2, Mods[i].name);
+				if( Mods[i].grdn ) then
+					tip:SetCell(i, 2, "|cffffff66"..Mods[i].name.."|r");
+				else
+					tip:SetCell(i, 2, Mods[i].name);
+				end
 			end
+			
+			if( isProfiling ) then
+				tip:SetCell(i, 3, Mods[i].cpu);
+				tip:SetCell(i, 4, Mods[i].cpud);
+			end
+			
+			tip:SetCell(i, isProfiling and 5 or 3, format_memory(Mods[i].mem, Mods[i].mems));
+			tip:SetCell(i, isProfiling and 6 or 4, Mods[i].memd == 0 and "" or format_memory(Mods[i].memd, Mods[i].mems));
 		end
-		
-		if( isProfiling ) then
-			tip:SetCell(i, 3, Mods[i].cpu);
-			tip:SetCell(i, 4, Mods[i].cpud);
-		end
-		
-		tip:SetCell(i, isProfiling and 5 or 3, format_memory(Mods[i].mem, Mods[i].mems));
-		tip:SetCell(i, isProfiling and 6 or 4, Mods[i].memd == 0 and "" or format_memory(Mods[i].memd, Mods[i].mems));
+	else
+		numAddons = -1;
 	end
 	
 	if( isProfiling ) then
-		tip:SetCell(self.db.DisplayNumAddons + 2, 3, TotalCPU);
-		tip:SetCell(self.db.DisplayNumAddons + 2, 4, TotalCPUDiff);
+		tip:SetCell(numAddons + 2, 3, TotalCPU);
+		tip:SetCell(numAddons + 2, 4, TotalCPUDiff);
 	end
 	
-	tip:SetCell(self.db.DisplayNumAddons + 2, isProfiling and 5 or 3, format_memory(TotalMemory));
-	tip:SetCell(self.db.DisplayNumAddons + 2, isProfiling and 6 or 4, format_memory(TotalMemoryDiff));
+	tip:SetCell(numAddons + 2, isProfiling and 5 or 3, format_memory(TotalMemory));
+	tip:SetCell(numAddons + 2, isProfiling and 6 or 4, format_memory(TotalMemoryDiff));
 	
-	tip:SetCell(self.db.DisplayNumAddons + 3, isProfiling and 5 or 3, format_memory(collectgarbage("count") - TotalMemory));
+	tip:SetCell(numAddons + 3, isProfiling and 5 or 3, format_memory(collectgarbage("count") - TotalMemory));
 	
-	tip:SetCell(self.db.DisplayNumAddons + 5, isProfiling and 5 or 3, format_fps(iFramerate), nil, "RIGHT", 2);
-	tip:SetCell(self.db.DisplayNumAddons + 6, isProfiling and 5 or 3, format_latency(iLatencyWorld), nil, "RIGHT", 2);
-	tip:SetCell(self.db.DisplayNumAddons + 7, isProfiling and 5 or 3, format_kbs(iDownload), nil, "RIGHT", 2);
-	tip:SetCell(self.db.DisplayNumAddons + 8, isProfiling and 5 or 3, format_kbs(iUpload), nil, "RIGHT", 2);
+	tip:SetCell(numAddons + 5, isProfiling and 5 or 3, format_fps(iFramerate), nil, "RIGHT", 2);
+	tip:SetCell(numAddons + 6, isProfiling and 5 or 3, format_latency(iLatencyWorld), nil, "RIGHT", 2);
+	tip:SetCell(numAddons + 7, isProfiling and 5 or 3, format_kbs(iDownload), nil, "RIGHT", 2);
+	tip:SetCell(numAddons + 8, isProfiling and 5 or 3, format_kbs(iUpload), nil, "RIGHT", 2);
 end
