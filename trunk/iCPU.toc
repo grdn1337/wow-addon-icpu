@@ -1,6 +1,6 @@
 ## Interface: 50001
 ## Title: i|cffffffaaCPU|r
-## Version: 0.0.1
+## Version: 1.0.0
 ## Notes: Displayes performance informations on your broker bar!
 ## Author: grdn
 ## SavedVariables: iCPUDB
@@ -14,7 +14,6 @@ Libs\libdatabroker-1-1\LibDataBroker-1.1.lua
 Libs\iLib\lib.xml
 Libs\LibCrayon-3.0\lib.xml
 
-Libs\AceBucket-3.0\AceBucket-3.0.xml
 Libs\AceGUI-3.0\AceGUI-3.0.xml
 Libs\AceConfig-3.0\AceConfig-3.0.xml
 Libs\AceDB-3.0\AceDB-3.0.xml

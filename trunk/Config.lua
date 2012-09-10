@@ -25,7 +25,7 @@ function iCPU:CreateDB()
 	
 	return { profile = {
 		UpdateInterval = 2.5,
-		DisplayNumAddons = 30,
+		DisplayNumAddons = 20,
 		DecimalDigits = 1,
 		PluginShowMemory = true,
 		PluginShowFramerate = true,
