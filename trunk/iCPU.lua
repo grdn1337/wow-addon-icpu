@@ -300,10 +300,7 @@ function iCPU:UpdateData()
 	iFramerate = _G.GetFramerate();
 	iDownload, iUpload, iLatencyHome, iLatencyWorld = _G.GetNetStats();
 	
-	if( self:IsTooltip("Main") ) then
-		self:CheckTooltips("Main");
-	end
-	
+	self:CheckTooltips("Main");
 	self:UpdateBroker();
 end
 
@@ -319,9 +316,16 @@ function iCPU:UpdateTooltip(tip)
 	end
 	
 	local line;
-	local numAddons = self.db.DisplayNumAddons > _G.GetNumAddOns() and _G.GetNumAddOns() or self.db.DisplayNumAddons;
+	local numAddons = self.db.DisplayNumAddons > #Mods and #Mods or self.db.DisplayNumAddons;
+	local addonPos = 0; -- if the update notice is displayed, addonPos is increased by 1
 	
 	if( firstDisplay ) then
+		if( LibStub("iLib"):IsUpdate(AddonName) ) then
+			line = tip:AddHeader("");
+			tip:SetCell(line, 1, "|cffff0000"..L["Addon update available!"].."|r", nil, "CENTER", 0);
+			addonPos = 1;
+		end
+		
 		if( self.db.DisplayNumAddons > 0 ) then
 			for i = 1, numAddons do
 				tip:AddLine((COLOR_GOLD):format(i));
@@ -354,37 +358,33 @@ function iCPU:UpdateTooltip(tip)
 				tip:SetCell(line, 1, (COLOR_GOLD):format(L["Stream (U/D)"]), nil, "LEFT", -2);
 			end
 		end
-		
-		if( LibStub("iLib"):IsUpdate(AddonName) ) then
-			tip:AddSeparator();
-			line = tip:AddLine("");
-			tip:SetCell(line, 1, "|cffff0000"..L["Addon update available!"].."|r", nil, "CENTER", 0);
-		end
 	end
 	
 	if( self.db.DisplayNumAddons > 0 ) then
 		for i = 1, numAddons do
 			if( Mods[i].name == AddonName ) then
-				tip:SetCell(i, 2, "|cff11bbbb"..Mods[i].name.."|r");
+				tip:SetCell(addonPos + i, 2, "|cff11bbbb"..Mods[i].name.."|r");
 			else
 				if( Mods[i].grdn ) then
-					tip:SetCell(i, 2, "|cffffff66"..Mods[i].name.."|r");
+					tip:SetCell(addonPos + i, 2, "|cffffff66"..Mods[i].name.."|r");
 				else
-					tip:SetCell(i, 2, Mods[i].name);
+					tip:SetCell(addonPos + i, 2, Mods[i].name);
 				end
 			end
 			
 			if( isProfiling ) then
-				tip:SetCell(i, 3, format_cpu(Mods[i].cpu, Mods[i].cpus));
-				tip:SetCell(i, 4, Mods[i].cpud == 0 and "" or format_cpu(Mods[i].cpud, Mods[i].cpus));
+				tip:SetCell(addonPos + i, 3, format_cpu(Mods[i].cpu, Mods[i].cpus));
+				tip:SetCell(addonPos + i, 4, Mods[i].cpud == 0 and "" or format_cpu(Mods[i].cpud, Mods[i].cpus));
 			end
 			
-			tip:SetCell(i, isProfiling and 5 or 3, format_memory(Mods[i].mem, Mods[i].mems));
-			tip:SetCell(i, isProfiling and 6 or 4, Mods[i].memd == 0 and "" or format_memory(Mods[i].memd, Mods[i].mems));
+			tip:SetCell(addonPos + i, isProfiling and 5 or 3, format_memory(Mods[i].mem, Mods[i].mems));
+			tip:SetCell(addonPos + i, isProfiling and 6 or 4, Mods[i].memd == 0 and "" or format_memory(Mods[i].memd, Mods[i].mems));
 		end
 	else
 		numAddons = -1;
 	end
+	
+	numAddons = numAddons + addonPos;
 	
 	if( isProfiling ) then
 		tip:SetCell(numAddons + 2, 3, format_cpu(TotalCPU, true));
