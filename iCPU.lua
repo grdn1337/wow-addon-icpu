@@ -127,6 +127,11 @@ iCPU.ldb.OnEnter = function(anchor)
 	local tip = iCPU:GetTooltip("Main", "UpdateTooltip");
 	tip:SmartAnchorTo(anchor);
 	tip:SetAutoHideDelay(0.25, anchor);
+	
+	if( iCPU.db.TooltipUseScroller ) then
+		tip:UpdateScrolling(iCPU.db.TooltipMaxSize);
+	end
+	
 	tip:Show();
 end
 
@@ -316,6 +321,7 @@ function iCPU:UpdateTooltip(tip)
 	end
 	
 	local line;
+	
 	local numAddons = self.db.DisplayNumAddons > #Mods and #Mods or self.db.DisplayNumAddons;
 	local addonPos = 0; -- if the update notice is displayed, addonPos is increased by 1
 	
@@ -410,5 +416,10 @@ function iCPU:UpdateTooltip(tip)
 	if( self.db.TooltipShowStreaming ) then
 		tip:SetCell(numAddons + pos, isProfiling and 5 or 3, format_kbs(iUpload).." / "..format_kbs(iDownload), nil, "RIGHT", 2);
 		--pos = pos + 1; <- haha, I don't think we need this here. Lets save 0,000001 ns CPU using :D
+	end
+	
+	-- check visibility of tooltip and if yes, update scrollbar
+	if( iCPU.db.TooltipUseScroller and tip:IsVisible() ) then
+		tip:UpdateScrolling(self.db.TooltipMaxSize);
 	end
 end
