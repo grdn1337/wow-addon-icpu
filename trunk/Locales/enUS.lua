@@ -21,6 +21,10 @@ L["Tooltip Options"] = true
 L["Number of Addons"] = true
 L["Setting this to 0 will disable listing addons."] = true
 
+L["Max height of tooltip"] = true
+L["Use Scrollbar"] = true
+L["Define the maximal height of the tooltip if you are using a scrollbar."] = true
+
 L["mb"] = true
 L["kb"] = true
 L["kb/s"] = true

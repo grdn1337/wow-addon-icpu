@@ -25,7 +25,7 @@ function iCPU:CreateDB()
 	
 	return { profile = {
 		UpdateInterval = 2.5,
-		DisplayNumAddons = 20,
+		DisplayNumAddons = 50,
 		DecimalDigits = 1,
 		PluginShowMemory = true,
 		PluginShowFramerate = true,
@@ -34,6 +34,8 @@ function iCPU:CreateDB()
 		TooltipShowFramerate = true,
 		TooltipShowLatency = true,
 		TooltipShowStreaming = true,
+		TooltipUseScroller = true,
+		TooltipMaxSize = 600,
 	}};
 end
 
@@ -125,8 +127,23 @@ local function CreateConfig()
 						desc = L["Setting this to 0 will disable listing addons."],
 						order = 1,
 						min = 0,
-						max = 50,
+						max = 200,
 						step = 1,
+						width = "full",
+					},
+					TooltipUseScroller = {
+						type = "toggle",
+						name = L["Use Scrollbar"],
+						order = 2,
+					},
+					TooltipMaxSize = {
+						type = "range",
+						name = L["Max height of tooltip"],
+						desc = L["Define the maximal height of the tooltip if you are using a scrollbar."],
+						order = 3,
+						min = 100,
+						max = 1500,
+						step = 50,
 						width = "full",
 					},
 					TooltipShowFramerate = {
