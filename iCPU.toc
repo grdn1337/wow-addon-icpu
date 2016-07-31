@@ -1,6 +1,6 @@
-## Interface: 60200
+## Interface: 70000
 ## Title: i|cffffffaaCPU|r
-## Version: 6.2.1
+## Version: 7.0.1
 ## Notes: Displayes performance informations on your broker bar!
 ## Author: grdn
 ## SavedVariables: iCPUDB
