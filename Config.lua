@@ -29,9 +29,11 @@ function iCPU:CreateDB()
 		DecimalDigits = 1,
 		PluginShowMemory = true,
 		PluginShowFramerate = true,
+		PluginShowLatencyHome = true,
 		PluginShowLatency = true,
 		PluginShowCPU = true,
 		TooltipShowFramerate = true,
+		ToolTipShowLatencyHome = true,
 		TooltipShowLatency = true,
 		TooltipShowStreaming = true,
 		TooltipUseScroller = true,
@@ -102,9 +104,14 @@ local function CreateConfig()
 						name = L["Display FPS"],
 						order = 5,
 					},
+					PluginShowLatencyHome = {
+						type = "toggle",
+						name = L["Display Latency Home"],
+						order = 7,
+					},
 					PluginShowLatency = {
 						type = "toggle",
-						name = L["Display Latency"],
+						name = L["Display Latency World"],
 						order = 10,
 					},
 					PluginShowCPU = {
@@ -151,9 +158,14 @@ local function CreateConfig()
 						name = L["Display FPS"],
 						order = 5,
 					},
+					TooltipShowLatencyHome = {
+						type = "toggle",
+						name = L["Display Latency Home"],
+						order = 7,
+					},
 					TooltipShowLatency = {
 						type = "toggle",
-						name = L["Display Latency"],
+						name = L["Display Latency World"],
 						order = 10,
 					},
 					TooltipShowStreaming = {

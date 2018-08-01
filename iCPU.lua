@@ -241,6 +241,7 @@ function iCPU:UpdateBroker()
 			(isProfiling and self.db.PluginShowCPU and format_cpu(TotalCPU, true, true).." " or "")..
 			(self.db.PluginShowMemory and format_memory(TotalMemory, nil, true).." " or "")..
 			(self.db.PluginShowFramerate and format_fps(iFramerate, true).." " or "")..
+			(self.db.PluginShowLatencyHome and format_latency(iLatencyHome, true).." " or "")..
 			(self.db.PluginShowLatency and format_latency(iLatencyWorld, true).." " or "")
 		;
 	end
@@ -354,9 +355,14 @@ function iCPU:UpdateTooltip(tip)
 				tip:SetCell(line, 1, (COLOR_GOLD):format(L["Framerate"]), nil, "LEFT", -2);
 			end
 			
+			if( self.db.TooltipShowLatencyHome ) then
+				line = tip:AddLine(" ");
+				tip:SetCell(line, 1, (COLOR_GOLD):format(L["Latency Home"]), nil, "LEFT", -2);
+			end
+			
 			if( self.db.TooltipShowLatency ) then
 				line = tip:AddLine(" ");
-				tip:SetCell(line, 1, (COLOR_GOLD):format(L["Latency"]), nil, "LEFT", -2);
+				tip:SetCell(line, 1, (COLOR_GOLD):format(L["Latency World"]), nil, "LEFT", -2);
 			end
 			
 			if( self.db.TooltipShowStreaming ) then
@@ -405,6 +411,11 @@ function iCPU:UpdateTooltip(tip)
 	pos = 5;
 	if( self.db.TooltipShowFramerate ) then
 		tip:SetCell(numAddons + pos, isProfiling and 5 or 3, format_fps(iFramerate), nil, "RIGHT", 2);
+		pos = pos + 1;
+	end
+	
+	if( self.db.TooltipShowLatencyHome ) then
+		tip:SetCell(numAddons + pos, isProfiling and 5 or 3, format_latency(iLatencyHome), nil, "RIGHT", 2);
 		pos = pos + 1;
 	end
 	
