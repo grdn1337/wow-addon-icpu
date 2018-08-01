@@ -1,6 +1,6 @@
 ## Interface: 80000
 ## Title: i|cffffffaaCPU|r
-## Version: 8.0.1
+## Version: 8.0.2
 ## Notes: Displayes performance informations on your broker bar!
 ## Author: grdn
 ## SavedVariables: iCPUDB

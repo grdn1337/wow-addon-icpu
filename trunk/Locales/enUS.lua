@@ -13,7 +13,8 @@ L["Update Interval"] = true
 L["The lower the value, the more CPU is needed!"] = true
 L["Display Memory"] = true
 L["Display FPS"] = true
-L["Display Latency"] = true
+L["Display Latency Home"] = true
+L["Display Latency World"] = true
 L["Display CPU"] = true
 L["Display Streaming"] = true
 L["Displays the CPU time on the plugin when CPU profiling is enabled (Ctrl+Click)."] = true
@@ -32,7 +33,8 @@ L["ms"] = true
 L["fps"] = true
 L["Blizz UI"] = true
 L["Framerate"] = true
-L["Latency"] = true
+L["Latency Home"] = true
+L["Latency World"] = true
 L["Stream (U/D)"] = true
 
 --@end-do-not-package@
