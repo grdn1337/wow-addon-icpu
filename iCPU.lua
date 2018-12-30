@@ -23,7 +23,7 @@ LibStub("iLib"):Register(AddonName, nil, iCPU);
 -- Variables, functions and colors
 -----------------------------------------
 
-local hugeAddonMemory = 61440; -- 60 MB = red colors, everything lower colors it green
+local hugeAddonMemory = 131072; -- 128 MB = red colors, everything lower colors it green
 local hugeFramerate = 48; -- at 24fps, the fps becomes yellow, higher values color it green, lower values red
 local hugeLatency = 200; -- at 100ms, the latency becomes yellow, lower than 100ms colors it green, higher values red
 
