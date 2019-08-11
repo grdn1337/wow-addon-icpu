@@ -1,6 +1,6 @@
-## Interface: 80100
+## Interface: 80200
 ## Title: i|cffffffaaCPU|r
-## Version: 8.1.0
+## Version: 8.2.0
 ## Notes: Displayes performance informations on your broker bar!
 ## Author: grdn
 ## SavedVariables: iCPUDB
