@@ -1,6 +1,6 @@
-## Interface: 80200
+## Interface: 11302
 ## Title: i|cffffffaaCPU|r
-## Version: 8.2.1
+## Version: 1.13.0
 ## Notes: Displayes performance informations on your broker bar!
 ## Author: grdn
 ## SavedVariables: iCPUDB
