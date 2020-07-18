@@ -1,6 +1,6 @@
-## Interface: 11302
+## Interface: 11305
 ## Title: i|cffffffaaCPU|r
-## Version: 1.13.0
+## Version: 1.13.1
 ## Notes: Displayes performance informations on your broker bar!
 ## Author: grdn
 ## SavedVariables: iCPUDB
